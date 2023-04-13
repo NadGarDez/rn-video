@@ -348,6 +348,7 @@ class ReactExoplayerView extends FrameLayout implements
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
         initializePlayer();
+        stopPlayback();
     }
 
     @Override
@@ -356,7 +357,7 @@ class ReactExoplayerView extends FrameLayout implements
         /* We want to be able to continue playing audio when switching tabs.
          * Leave this here in case it causes issues.
          */
-        // stopPlayback();
+        stopPlayback();
     }
 
     // LifecycleEventListener implementation
@@ -372,10 +373,11 @@ class ReactExoplayerView extends FrameLayout implements
     @Override
     public void onHostPause() {
         isInBackground = true;
-        if (playInBackground || showPictureInPictureOnLeave) {
-            return;
+
+        if (playInBackground) {
+            setPlayWhenReady(false);
         }
-        setPlayWhenReady(false);
+
     }
 
     @Override
@@ -421,7 +423,11 @@ class ReactExoplayerView extends FrameLayout implements
 
     public void onPictureInPictureModeChanged(boolean isInPictureInPictureMode) {
         eventEmitter.pictureInPictureModeChanged(isInPictureInPictureMode);
-        setPausedModifier(false);
+        if(isInPictureInPictureMode){
+            setPlayWhenReady(true);
+        }
+
+        //  setPausedModifier(false);
     }
 
     /**
@@ -489,6 +495,7 @@ class ReactExoplayerView extends FrameLayout implements
                 @Override
                 public void handleOnBackPressed() {
                     setFullscreen(false);
+                    stopPlayback();
                 }
             });
         }
@@ -513,8 +520,9 @@ class ReactExoplayerView extends FrameLayout implements
         pip_button.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                setFullscreen(true)
                 setPictureInPicture(!isInPictureInPictureMode);
+                setFullscreen(true);
+
             }
         });
 
@@ -680,7 +688,7 @@ class ReactExoplayerView extends FrameLayout implements
                                     eventEmitter.error("Failed to initialize DRM Session Manager Framework!", new Exception("DRM Session Manager Framework failure!"), "3003");
                                     return;
                                 }
-                                    
+
                                 if (activity == null) {
                                     Log.e("ExoPlayer Exception", "Failed to initialize Player!");
                                     eventEmitter.error("Failed to initialize Player!", new Exception("Current Activity is null!"), "1001");
