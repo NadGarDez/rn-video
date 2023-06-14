@@ -408,9 +408,10 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
 
     @objc
     func setPictureInPicture(_ pictureInPicture:Bool) {
-#if TARGET_OS_IOS
+        print("hello world")
+// #if TARGET_OS_IOS
         _pip.setPictureInPicture(pictureInPicture)
-#endif
+// #endif
     }
 
     @objc
@@ -766,6 +767,7 @@ class RCTVideo: UIView, RCTVideoPlayerViewControllerDelegate, RCTPlayerObserverH
                 _playerViewController = nil
                 _playerObserver.playerViewController = nil
                 self.usePlayerLayer()
+                self.setPictureInPicture(true)
             }
         }
     }
